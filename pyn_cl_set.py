@@ -795,22 +795,8 @@ def good_select(system,condition):
 
 				
     for jj in range(len(possib)):		      #making selection using auxiliary functions g_parameter; if you want to select by new parameter - you need to add your own function
-	    if param=='atom_name':  
-                list_of_ind=g_atom_name(system,possib[jj].replace(' ',''),list_of_ind) 
-            elif param=='resid_name':
-                list_of_ind=g_resid_name(system,possib[jj].replace(' ',''),list_of_ind)
-            elif param=='donors':
-                possib='donor'
-                list_of_ind=g_donors(system,possib[jj].replace(' ',''),list_of_ind)
-            elif param=='acceptors':
-                possib='acceptor'
-                list_of_ind=g_acceptors(system,possib[jj].replace(' ',''),list_of_ind)
-            elif param=='atom_index':
-                list_of_ind=g_atom_index(system,possib[jj].replace(' ',''),list_of_ind)
-            elif param=='chain':
-                list_of_ind=g_chain(system,possib[jj].replace(' ',''),list_of_ind)
-            else:
-                print 'ERROR sel02: unknown parameter ',param
+        list_of_ind=param_sel(system,possib[jj].replace(' ',''),list_of_ind,param) 
+	   
 
     return(list_of_ind)  #######after all -  output is  list of index ##############
 
@@ -828,8 +814,21 @@ def prolong_string(condition):
             b+=condition[ii]
     return b
 
-### additional func for all parameters ###
-def g_atom_name(system,possib,list_of_ind):    
+def param_sel(system,possib,list_of_ind,param):
+    if param=='atom_index':
+        if ':' in possib:
+            a=possib
+            i = a[a.index('[')+1:a.index(':')]
+            j = a[a.index(':')+1:a.index(']')]
+       
+            if int(j)>system.num_atoms:
+                j=system.num_atoms
+                print 'Total number of atoms in your system is ', system.num_atoms
+            for kk in range(int(i),int(j)):
+                list_of_ind.append(kk)
+        
+        return list_of_ind
+    elif param=='atom_name':
         for ii in range(system.num_atoms):
             
             if system.atom[ii].name==possib:
@@ -837,8 +836,7 @@ def g_atom_name(system,possib,list_of_ind):
                 list_of_ind.append(ii)
                 
         return list_of_ind
-
-def g_resid_name(system,possib,list_of_ind):    
+    elif param=='resid_name':
         for ii in range(system.num_atoms):
 
             if system.atom[ii].resid.name==possib:
@@ -846,15 +844,13 @@ def g_resid_name(system,possib,list_of_ind):
                 list_of_ind.append(ii)
              
         return list_of_ind
-
-def g_donors(system,possib,list_of_ind):    
+    elif param=='donors':
         for ii in range(system.num_atoms):
             if system.atom[ii].donor==True:
                 list_of_ind.append(ii)
              
         return list_of_ind
-
-def g_acceptors(system,possib,list_of_ind):    
+    elif param=='acceptors':
         for ii in range(system.num_atoms):
 
             if system.atom[ii].acceptor==True:
@@ -862,23 +858,7 @@ def g_acceptors(system,possib,list_of_ind):
                 list_of_ind.append(ii)
              
         return list_of_ind
-
-def g_atom_index(system,possib,list_of_ind):
-    
-    if ':' in possib:
-        a=possib
-        i = a[a.index('[')+1:a.index(':')]
-        j = a[a.index(':')+1:a.index(']')]
-       
-        if int(j)>system.num_atoms:
-            j=system.num_atoms
-            print 'Total number of atoms in your system is ', system.num_atoms
-        for kk in range(int(i),int(j)):
-            list_of_ind.append(kk)
-        
-    return list_of_ind
-
-def g_chain(system,possib,list_of_ind):    
+    elif param=='chain':
         for ii in range(system.num_atoms):
             
             if system.atom[ii].chain==possib:
@@ -886,6 +866,8 @@ def g_chain(system,possib,list_of_ind):
                 list_of_ind.append(ii)
                 
         return list_of_ind
+    else:
+        print 'ERROR sel02: unknown parameter ',param
 
 ##############extracting from list of atom indexes###########################
 
